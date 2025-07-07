@@ -1,0 +1,146 @@
+# Library Management System - Apache Configuration
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# Hide sensitive files
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "config_production.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "functions.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.sql">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "README.md">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "DEPLOYMENT.md">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Redirect to HTTPS (uncomment if SSL is available)
+# RewriteEngine On
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Pretty URLs (optional)
+RewriteEngine On
+
+# Redirect root to login if not authenticated
+RewriteCond %{REQUEST_URI} ^/$
+RewriteRule ^(.*)$ index.php [L]
+
+# Handle admin routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^admin/([^/]+)/?$ admin/$1.php [L,QSA]
+
+# Handle student routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^student/([^/]+)/?$ student/$1.php [L,QSA]
+
+# Handle user routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^user/([^/]+)/?$ user/$1.php [L,QSA]
+
+# Prevent directory browsing
+Options -Indexes
+
+# Set default timezone
+<IfModule mod_php.c>
+    php_value date.timezone "Asia/Manila"
+</IfModule>
+
+# Increase upload limits (adjust as needed)
+<IfModule mod_php.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+    php_value memory_limit 128M
+</IfModule>
+
+# Browser Caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# Gzip Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Error Pages (create custom error pages if needed)
+# ErrorDocument 404 /error/404.php
+# ErrorDocument 500 /error/500.php
+# ErrorDocument 403 /error/403.php
+
+# Prevent access to backup files
+<FilesMatch "\.(bak|backup|old|tmp|temp)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent access to version control files
+<FilesMatch "\.(git|svn|hg)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Content Security Policy (adjust as needed)
+<IfModule mod_headers.c>
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self';"
+</IfModule>
+
+# Prevent clickjacking
+<IfModule mod_headers.c>
+    Header always append X-Frame-Options SAMEORIGIN
+</IfModule>
+

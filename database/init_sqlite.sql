@@ -1,58 +1,54 @@
--- Library Management System Database Schema
--- Created for PHP Library System
-
-CREATE DATABASE IF NOT EXISTS library_system;
-USE library_system;
+-- Library Management System SQLite Database Schema
 
 -- Users table (Admin/Librarian and Students)
 CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'student') DEFAULT 'student',
+    role VARCHAR(20) DEFAULT 'student' CHECK (role IN ('admin', 'student')),
     full_name VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT 1
 );
 
 -- Books table
 CREATE TABLE books (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    book_id VARCHAR(20) UNIQUE NOT NULL, -- Generated ID like THFEB102022-FIC00001
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_id VARCHAR(20) UNIQUE NOT NULL,
     title VARCHAR(200) NOT NULL,
     author VARCHAR(100) NOT NULL,
-    category VARCHAR(50) NOT NULL, -- FIC, NON, SCI, etc.
+    category VARCHAR(50) NOT NULL,
     isbn VARCHAR(20) UNIQUE,
-    publication_year INT NOT NULL,
-    publication_month INT NOT NULL,
+    publication_year INTEGER NOT NULL,
+    publication_month INTEGER NOT NULL,
     description TEXT,
-    status ENUM('available', 'borrowed', 'archived') DEFAULT 'available',
-    date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    status VARCHAR(20) DEFAULT 'available' CHECK (status IN ('available', 'borrowed', 'archived')),
+    date_added DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Borrowing records table
 CREATE TABLE borrowings (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    book_id INT NOT NULL,
-    borrow_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    due_date TIMESTAMP NOT NULL,
-    return_date TIMESTAMP NULL,
-    status ENUM('borrowed', 'returned', 'overdue') DEFAULT 'borrowed',
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    book_id INTEGER NOT NULL,
+    borrow_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    due_date DATETIME NOT NULL,
+    return_date DATETIME NULL,
+    status VARCHAR(20) DEFAULT 'borrowed' CHECK (status IN ('borrowed', 'returned', 'overdue')),
     fine_amount DECIMAL(10,2) DEFAULT 0.00,
-    fine_paid BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    fine_paid BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
 );
 
 -- Categories table (for reference)
 CREATE TABLE categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     code VARCHAR(10) UNIQUE NOT NULL,
     name VARCHAR(50) NOT NULL,
     description TEXT
@@ -69,10 +65,9 @@ INSERT INTO categories (code, name, description) VALUES
 ('EDU', 'Education', 'Educational and academic books'),
 ('ART', 'Arts', 'Arts and literature books');
 
--- Insert default admin user
+-- Insert default admin user (password: password)
 INSERT INTO users (username, email, password_hash, role, full_name) VALUES
 ('admin', 'admin@library.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'System Administrator');
--- Default password is 'password'
 
 -- Insert sample books (minimum 50 books requirement)
 INSERT INTO books (book_id, title, author, category, publication_year, publication_month, description) VALUES
@@ -85,10 +80,7 @@ INSERT INTO books (book_id, title, author, category, publication_year, publicati
 ('THFEB102022-SCI00007', 'The Origin of Species', 'Charles Darwin', 'SCI', 2022, 2, 'Scientific work on evolution'),
 ('AFEB102022-SCI00008', 'A Brief History of Time', 'Stephen Hawking', 'SCI', 2022, 2, 'Popular science book'),
 ('THFEB102022-HIS00009', 'The Art of War', 'Sun Tzu', 'HIS', 2022, 2, 'Ancient Chinese military treatise'),
-('SAFEB102022-NON00010', 'Sapiens', 'Yuval Noah Harari', 'NON', 2022, 2, 'History of humankind');
-
--- Add more sample books to meet minimum requirement
-INSERT INTO books (book_id, title, author, category, publication_year, publication_month, description) VALUES
+('SAFEB102022-NON00010', 'Sapiens', 'Yuval Noah Harari', 'NON', 2022, 2, 'History of humankind'),
 ('THFEB102022-FIC00011', 'The Catcher in the Rye', 'J.D. Salinger', 'FIC', 2022, 2, 'Coming-of-age story'),
 ('ANFEB102022-FIC00012', 'Animal Farm', 'George Orwell', 'FIC', 2022, 2, 'Political allegory'),
 ('BRFEB102022-FIC00013', 'Brave New World', 'Aldous Huxley', 'FIC', 2022, 2, 'Dystopian novel'),

@@ -1,8 +1,9 @@
--- Library Management System Database Schema
--- Created for PHP Library System
+-- Library Management System MySQL Database Schema
+-- For Production Deployment
 
-CREATE DATABASE IF NOT EXISTS library_system;
-USE library_system;
+-- Create database (uncomment if needed)
+-- CREATE DATABASE library_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- USE library_system;
 
 -- Users table (Admin/Librarian and Students)
 CREATE TABLE users (
@@ -14,24 +15,32 @@ CREATE TABLE users (
     full_name VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
-);
+    is_active BOOLEAN DEFAULT TRUE,
+    INDEX idx_username (username),
+    INDEX idx_email (email),
+    INDEX idx_role (role)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Books table
 CREATE TABLE books (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    book_id VARCHAR(20) UNIQUE NOT NULL, -- Generated ID like THFEB102022-FIC00001
+    book_id VARCHAR(20) UNIQUE NOT NULL,
     title VARCHAR(200) NOT NULL,
     author VARCHAR(100) NOT NULL,
-    category VARCHAR(50) NOT NULL, -- FIC, NON, SCI, etc.
+    category VARCHAR(50) NOT NULL,
     isbn VARCHAR(20) UNIQUE,
     publication_year INT NOT NULL,
     publication_month INT NOT NULL,
     description TEXT,
     status ENUM('available', 'borrowed', 'archived') DEFAULT 'available',
     date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_book_id (book_id),
+    INDEX idx_status (status),
+    INDEX idx_category (category),
+    INDEX idx_title (title),
+    INDEX idx_author (author)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Borrowing records table
 CREATE TABLE borrowings (
@@ -47,16 +56,22 @@ CREATE TABLE borrowings (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
-);
+    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_book_id (book_id),
+    INDEX idx_status (status),
+    INDEX idx_due_date (due_date),
+    INDEX idx_borrow_date (borrow_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Categories table (for reference)
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     code VARCHAR(10) UNIQUE NOT NULL,
     name VARCHAR(50) NOT NULL,
-    description TEXT
-);
+    description TEXT,
+    INDEX idx_code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Insert default categories
 INSERT INTO categories (code, name, description) VALUES
@@ -69,10 +84,10 @@ INSERT INTO categories (code, name, description) VALUES
 ('EDU', 'Education', 'Educational and academic books'),
 ('ART', 'Arts', 'Arts and literature books');
 
--- Insert default admin user
+-- Insert default admin user (password: password)
+-- Note: Change this password immediately after deployment
 INSERT INTO users (username, email, password_hash, role, full_name) VALUES
 ('admin', 'admin@library.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'System Administrator');
--- Default password is 'password'
 
 -- Insert sample books (minimum 50 books requirement)
 INSERT INTO books (book_id, title, author, category, publication_year, publication_month, description) VALUES
@@ -85,10 +100,7 @@ INSERT INTO books (book_id, title, author, category, publication_year, publicati
 ('THFEB102022-SCI00007', 'The Origin of Species', 'Charles Darwin', 'SCI', 2022, 2, 'Scientific work on evolution'),
 ('AFEB102022-SCI00008', 'A Brief History of Time', 'Stephen Hawking', 'SCI', 2022, 2, 'Popular science book'),
 ('THFEB102022-HIS00009', 'The Art of War', 'Sun Tzu', 'HIS', 2022, 2, 'Ancient Chinese military treatise'),
-('SAFEB102022-NON00010', 'Sapiens', 'Yuval Noah Harari', 'NON', 2022, 2, 'History of humankind');
-
--- Add more sample books to meet minimum requirement
-INSERT INTO books (book_id, title, author, category, publication_year, publication_month, description) VALUES
+('SAFEB102022-NON00010', 'Sapiens', 'Yuval Noah Harari', 'NON', 2022, 2, 'History of humankind'),
 ('THFEB102022-FIC00011', 'The Catcher in the Rye', 'J.D. Salinger', 'FIC', 2022, 2, 'Coming-of-age story'),
 ('ANFEB102022-FIC00012', 'Animal Farm', 'George Orwell', 'FIC', 2022, 2, 'Political allegory'),
 ('BRFEB102022-FIC00013', 'Brave New World', 'Aldous Huxley', 'FIC', 2022, 2, 'Dystopian novel'),
@@ -130,11 +142,91 @@ INSERT INTO books (book_id, title, author, category, publication_year, publicati
 ('THFEB102022-REF00049', 'The Elements of Style', 'Strunk and White', 'REF', 2022, 2, 'Writing guide'),
 ('CHFEB102022-REF00050', 'Chicago Manual of Style', 'University of Chicago Press', 'REF', 2022, 2, 'Style guide');
 
--- Create indexes for better performance
-CREATE INDEX idx_books_status ON books(status);
-CREATE INDEX idx_books_category ON books(category);
-CREATE INDEX idx_borrowings_user ON borrowings(user_id);
-CREATE INDEX idx_borrowings_book ON borrowings(book_id);
-CREATE INDEX idx_borrowings_status ON borrowings(status);
-CREATE INDEX idx_borrowings_due_date ON borrowings(due_date);
+-- Create a view for book statistics
+CREATE VIEW book_statistics AS
+SELECT 
+    COUNT(*) as total_books,
+    SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available_books,
+    SUM(CASE WHEN status = 'borrowed' THEN 1 ELSE 0 END) as borrowed_books,
+    SUM(CASE WHEN status = 'archived' THEN 1 ELSE 0 END) as archived_books
+FROM books;
+
+-- Create a view for user statistics
+CREATE VIEW user_statistics AS
+SELECT 
+    COUNT(*) as total_users,
+    SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admin_users,
+    SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) as student_users,
+    SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_users
+FROM users;
+
+-- Create a view for borrowing statistics
+CREATE VIEW borrowing_statistics AS
+SELECT 
+    COUNT(*) as total_borrowings,
+    SUM(CASE WHEN status = 'borrowed' THEN 1 ELSE 0 END) as active_borrowings,
+    SUM(CASE WHEN status = 'overdue' THEN 1 ELSE 0 END) as overdue_borrowings,
+    SUM(CASE WHEN status = 'returned' THEN 1 ELSE 0 END) as returned_borrowings,
+    SUM(fine_amount) as total_fines,
+    SUM(CASE WHEN fine_paid = 1 THEN fine_amount ELSE 0 END) as paid_fines
+FROM borrowings;
+
+-- Create triggers for automatic updates
+DELIMITER //
+
+-- Trigger to update book status when borrowed
+CREATE TRIGGER update_book_status_on_borrow
+    AFTER INSERT ON borrowings
+    FOR EACH ROW
+BEGIN
+    UPDATE books SET status = 'borrowed' WHERE id = NEW.book_id;
+END//
+
+-- Trigger to update book status when returned
+CREATE TRIGGER update_book_status_on_return
+    AFTER UPDATE ON borrowings
+    FOR EACH ROW
+BEGIN
+    IF NEW.status = 'returned' AND OLD.status != 'returned' THEN
+        UPDATE books SET status = 'available' WHERE id = NEW.book_id;
+    END IF;
+END//
+
+-- Trigger to calculate fines for overdue books
+CREATE TRIGGER calculate_overdue_fine
+    BEFORE UPDATE ON borrowings
+    FOR EACH ROW
+BEGIN
+    IF NEW.status = 'overdue' AND OLD.status != 'overdue' THEN
+        SET NEW.fine_amount = DATEDIFF(NOW(), NEW.due_date) * 10.00;
+    END IF;
+END//
+
+DELIMITER ;
+
+-- Create stored procedure to update overdue books
+DELIMITER //
+
+CREATE PROCEDURE UpdateOverdueBooks()
+BEGIN
+    UPDATE borrowings 
+    SET status = 'overdue', 
+        fine_amount = DATEDIFF(NOW(), due_date) * 10.00
+    WHERE due_date < NOW() 
+    AND status = 'borrowed';
+END//
+
+DELIMITER ;
+
+-- Create event to automatically update overdue books (if events are enabled)
+-- SET GLOBAL event_scheduler = ON;
+-- CREATE EVENT update_overdue_books_event
+-- ON SCHEDULE EVERY 1 HOUR
+-- DO CALL UpdateOverdueBooks();
+
+-- Final verification queries (uncomment to run after import)
+-- SELECT 'Database setup completed successfully!' as status;
+-- SELECT COUNT(*) as total_books FROM books;
+-- SELECT COUNT(*) as total_users FROM users;
+-- SELECT COUNT(*) as total_categories FROM categories;
 
