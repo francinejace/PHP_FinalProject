@@ -253,7 +253,7 @@ git commit -m "Initial commit: Library Management System"
 
 ### Step 3: Connect and Push
 ```bash
-git remote add origin https://github.com/yourusername/library-management-system.git
+git remote add origin https://github.com/francinejace/library-management-system.git
 git branch -M main
 git push -u origin main
 ```

@@ -1,28 +1,29 @@
 <?php
 // Database configuration for testing with SQLite
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'library_system');
+define("DB_HOST", "localhost");
+define("DB_USER", "root");
+define("DB_PASS", "");
+define("DB_NAME", "library_system");
 
 // Application settings
-define('SITE_NAME', 'Library Management System');
-define('SITE_URL', 'http://localhost:8000');
-define('ADMIN_EMAIL', 'admin@library.com');
+define("SITE_NAME", "Library Management System");
+define("SITE_URL", "https://8000-ikkjbf0igq1nw4nwb4jzt-fc46ea16.manus.computer");
+define("ADMIN_EMAIL", "admin@library.com");
 
 // Session settings
 session_start();
 
 // Timezone
-date_default_timezone_set('Asia/Manila');
+date_default_timezone_set("Asia/Manila");
 
 // Error reporting (disable in production)
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set("display_errors", 1);
 
 // Database connection using SQLite for testing
 try {
-    $db_path = __DIR__ . '/database/library.db';
+    $db_path = __DIR__ . 
+"/database/library.db";
     $pdo = new PDO("sqlite:" . $db_path);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -30,4 +31,3 @@ try {
     die("Connection failed: " . $e->getMessage());
 }
 ?>
-
