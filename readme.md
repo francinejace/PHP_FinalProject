@@ -11,7 +11,8 @@ A comprehensive PHP-based library management system with a beautiful brown & bei
 - Role-based access control
 
 ### 📚 Book Management
-- **Automatic Book ID Generation**: Format `TTMMMDDYYYY-CCC#####`
+- **Automatic Book ID Generation**: Format `TTMMMDDYYYY-CCC#####`  
+  *(Note: TTMMMDDYYYY and CCC##### are format placeholders, not literal words)*
   - TT: First 2 letters of title
   - MMM: Publication month (JAN, FEB, etc.)
   - DD: Day (fixed as 10)
@@ -147,7 +148,8 @@ For a book titled "The Great Gatsby" in Fiction category, published in February 
 - Day: 10 (fixed)
 - Year: 2022
 - Category: FIC (Fiction)
-- Sequence: 00001 (first book)
+- **Result**: `THFEB102022-FIC00001`  
+  *(Note: THFEB102022 is a sample generated ID, not a literal word)*
 - **Result**: `THFEB102022-FIC00001`
 
 ## Deployment
@@ -188,7 +190,8 @@ Modify borrowing rules in `functions.php`:
 ```php
 // Change maximum books per user
 return $active_borrowings < 2; // Change 2 to desired limit
-
+$due_date = date('Y-m-d H:i:s', strtotime('+7 days')); // Change +7 days
+// Note: strtotime is a standard PHP function for date/time manipulation
 // Change borrowing period
 $due_date = date('Y-m-d H:i:s', strtotime('+7 days')); // Change +7 days
 
