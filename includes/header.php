@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<<<<<<< HEAD
     <?php
     // Determine the correct path to assets based on current directory
     $current_dir = dirname($_SERVER['PHP_SELF']);
@@ -17,10 +18,14 @@
     }
     ?>
     <link rel="stylesheet" href="<?php echo $assets_path; ?>">
+=======
+    <link rel="stylesheet" href="assets/style.css">
+>>>>>>> a06b84533e66cd05eb96adc764eb21f77db2400d
 </head>
 <body>
     <header class="header">
         <div class="header-content">
+<<<<<<< HEAD
             <?php
             // Determine the correct path to index based on current directory
             if (strpos($current_dir, '/user') !== false || strpos($current_dir, '/admin') !== false || strpos($current_dir, '/student') !== false) {
@@ -53,6 +58,22 @@
                     <?php else: ?>
                         <li><a href="<?php echo $login_path; ?>">Login</a></li>
                         <li><a href="<?php echo $register_path; ?>">Register</a></li>
+=======
+            <a href="index.php" class="logo">Library System</a>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="index.php">Home</a></li>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <?php if ($_SESSION['role'] === 'admin'): ?>
+                            <li><a href="admin/dashboard.php">Admin Dashboard</a></li>
+                        <?php elseif ($_SESSION['role'] === 'student'): ?>
+                            <li><a href="student/dashboard.php">Student Dashboard</a></li>
+                        <?php endif; ?>
+                        <li><a href="user/logout.php">Logout</a></li>
+                    <?php else: ?>
+                        <li><a href="user/login.php">Login</a></li>
+                        <li><a href="user/register.php">Register</a></li>
+>>>>>>> a06b84533e66cd05eb96adc764eb21f77db2400d
                     <?php endif; ?>
                 </ul>
             </nav>
