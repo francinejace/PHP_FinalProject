@@ -1,10 +1,4 @@
-<?php 
-/**
- * Library Management System - Test Page
- * 
- * This page is used to test the modernized styling and functionality.
- * Enhanced with better structure, accessibility, and security features.
- */
+<?php
 
 // Include configuration and functions
 require_once 'config.php';
@@ -110,13 +104,13 @@ include 'includes/header.php';
                         <div class="form-group">
                             <label for="test-name" class="form-label">Full Name *</label>
                             <input type="text" id="test-name" name="name" class="form-control" 
-                                   placeholder="Enter your full name" required>
+                                placeholder="Enter your full name" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="test-email" class="form-label">Email Address *</label>
                             <input type="email" id="test-email" name="email" class="form-control" 
-                                   placeholder="Enter your email" required>
+                                placeholder="Enter your email" required>
                         </div>
                         
                         <div class="form-group">
@@ -132,7 +126,7 @@ include 'includes/header.php';
                         <div class="form-group">
                             <label for="test-message" class="form-label">Message</label>
                             <textarea id="test-message" name="message" class="form-control" rows="4" 
-                                      placeholder="Enter your message"></textarea>
+                                    placeholder="Enter your message"></textarea>
                         </div>
                         
                         <div class="form-group">
