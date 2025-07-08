@@ -1,4 +1,4 @@
-</main>
+    </main>
     
     <footer class="footer">
         <div class="footer-content">
@@ -8,6 +8,16 @@
         </div>
     </footer>
     
-    <script src="/assets/script.js"></script>
+    <?php
+    // Determine the correct path to assets based on current directory
+    $current_dir = dirname($_SERVER['PHP_SELF']);
+    if (strpos($current_dir, '/user') !== false || strpos($current_dir, '/admin') !== false || strpos($current_dir, '/student') !== false) {
+        $script_path = '../assets/script.js';
+    } else {
+        $script_path = 'assets/script.js';
+    }
+    ?>
+    <script src="<?php echo $script_path; ?>"></script>
 </body>
 </html>
+

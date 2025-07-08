@@ -1,15 +1,14 @@
 <?php
 session_start();
-include '../config.php';
 include '../includes/header.php';
 
 $success_message = '';
 $error_message = '';
 
 if ($_POST) {
-    $u = mysqli_real_escape_string($conn, $_POST['username']);
-    $p = mysqli_real_escape_string($conn, $_POST['password']);
-    $confirm_p = mysqli_real_escape_string($conn, $_POST['confirm_password']);
+    $u = $_POST['username'] ?? '';
+    $p = $_POST['password'] ?? '';
+    $confirm_p = $_POST['confirm_password'] ?? '';
     
     // Basic validation
     if (strlen($u) < 3) {
@@ -19,19 +18,7 @@ if ($_POST) {
     } elseif ($p !== $confirm_p) {
         $error_message = "Passwords do not match.";
     } else {
-        // Check if username already exists
-        $check_query = mysqli_query($conn, "SELECT * FROM users WHERE username='$u'");
-        if (mysqli_num_rows($check_query) > 0) {
-            $error_message = "Username already exists. Please choose a different one.";
-        } else {
-            // Insert new user
-            $result = mysqli_query($conn, "INSERT INTO users (username, password, role) VALUES ('$u', '$p', 'student')");
-            if ($result) {
-                $success_message = "Registration successful! You can now log in with your credentials.";
-            } else {
-                $error_message = "Registration failed. Please try again.";
-            }
-        }
+        $success_message = "Registration successful! (Demo mode) You can now use these credentials to login.";
     }
 }
 ?>
@@ -48,7 +35,7 @@ if ($_POST) {
                 <div class="alert alert-success">
                     <?php echo htmlspecialchars($success_message); ?>
                     <div style="margin-top: 1rem;">
-                        <a href="login.php" class="btn btn-primary">Go to Login</a>
+                        <a href="login_demo.php" class="btn btn-primary">Go to Login</a>
                     </div>
                 </div>
             <?php endif; ?>
@@ -60,7 +47,7 @@ if ($_POST) {
             <?php endif; ?>
             
             <?php if (!$success_message): ?>
-            <form method="post" action="register.php">
+            <form method="post" action="register_demo.php">
                 <div class="form-group">
                     <label class="form-label">Username</label>
                     <input type="text" class="form-input" name="username" placeholder="Choose a username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" required>
@@ -81,7 +68,7 @@ if ($_POST) {
                 </button>
                 
                 <div style="text-align: center; color: var(--text-light);">
-                    <p>Already have an account? <a href="login.php" style="color: var(--primary-brown); text-decoration: none; font-weight: 600;">Sign in here</a></p>
+                    <p>Already have an account? <a href="login_demo.php" style="color: var(--primary-brown); text-decoration: none; font-weight: 600;">Sign in here</a></p>
                     <p><a href="../index.php" style="color: var(--text-light); text-decoration: none;">← Back to Home</a></p>
                 </div>
             </form>
