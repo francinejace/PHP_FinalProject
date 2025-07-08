@@ -6,9 +6,9 @@ $success_message = '';
 $error_message = '';
 
 if ($_POST) {
-    $u = $_POST['username'] ?? '';
-    $p = $_POST['password'] ?? '';
-    $confirm_p = $_POST['confirm_password'] ?? '';
+    $u = trim($_POST['username'] ?? '');
+    $p = trim($_POST['password'] ?? '');
+    $confirm_p = trim($_POST['confirm_password'] ?? '');
     
     // Basic validation
     if (strlen($u) < 3) {
@@ -18,7 +18,7 @@ if ($_POST) {
     } elseif ($p !== $confirm_p) {
         $error_message = "Passwords do not match.";
     } else {
-        $success_message = "Registration successful! (Demo mode) You can now use these credentials to login.";
+        $success_message = "Registration successful! (Demo mode)<br>You can now log in as <strong>" . htmlspecialchars($u) . "</strong>.";
     }
 }
 ?>
@@ -33,7 +33,7 @@ if ($_POST) {
             
             <?php if ($success_message): ?>
                 <div class="alert alert-success">
-                    <?php echo htmlspecialchars($success_message); ?>
+                    <?php echo $success_message; ?>
                     <div style="margin-top: 1rem;">
                         <a href="login_demo.php" class="btn btn-primary">Go to Login</a>
                     </div>
@@ -50,7 +50,8 @@ if ($_POST) {
             <form method="post" action="register_demo.php">
                 <div class="form-group">
                     <label class="form-label">Username</label>
-                    <input type="text" class="form-input" name="username" placeholder="Choose a username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" required>
+                    <input type="text" class="form-input" name="username" placeholder="Choose a username"
+                        value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" required>
                 </div>
                 
                 <div class="form-group">
@@ -78,4 +79,3 @@ if ($_POST) {
 </div>
 
 <?php include '../includes/footer.php'; ?>
-
