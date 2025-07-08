@@ -1,5 +1,3 @@
-// Library Management System JavaScript
-
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize page animations
     initAnimations();
@@ -12,6 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize tooltips and interactive elements
     initInteractiveElements();
+    
+    // Initialize clock
+    initClock();
 });
 
 // Animation initialization
@@ -25,12 +26,24 @@ function initAnimations() {
 
 // Form validation
 function initFormValidations() {
-    const forms = document.querySelectorAll('form');
+    const forms = document.querySelectorAll('form[data-validate]');
     forms.forEach(form => {
         form.addEventListener('submit', function(e) {
             if (!validateForm(this)) {
                 e.preventDefault();
             }
+        });
+        
+        // Real-time validation
+        const inputs = form.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                validateField(this);
+            });
+            
+            input.addEventListener('input', function() {
+                clearFieldError(this);
+            });
         });
     });
 }
@@ -40,19 +53,7 @@ function validateForm(form) {
     const requiredFields = form.querySelectorAll('[required]');
     
     requiredFields.forEach(field => {
-        if (!field.value.trim()) {
-            showFieldError(field, 'This field is required');
-            isValid = false;
-        } else {
-            clearFieldError(field);
-        }
-    });
-    
-    // Email validation
-    const emailFields = form.querySelectorAll('input[type="email"]');
-    emailFields.forEach(field => {
-        if (field.value && !isValidEmail(field.value)) {
-            showFieldError(field, 'Please enter a valid email address');
+        if (!validateField(field)) {
             isValid = false;
         }
     });
@@ -71,18 +72,45 @@ function validateForm(form) {
     return isValid;
 }
 
+function validateField(field) {
+    const value = field.value.trim();
+    let isValid = true;
+    
+    // Required field validation
+    if (field.hasAttribute('required') && !value) {
+        showFieldError(field, 'This field is required');
+        isValid = false;
+    }
+    // Email validation
+    else if (field.type === 'email' && value && !isValidEmail(value)) {
+        showFieldError(field, 'Please enter a valid email address');
+        isValid = false;
+    }
+    // Minimum length validation
+    else if (field.hasAttribute('minlength') && value.length < parseInt(field.getAttribute('minlength'))) {
+        showFieldError(field, `Minimum ${field.getAttribute('minlength')} characters required`);
+        isValid = false;
+    }
+    else {
+        clearFieldError(field);
+    }
+    
+    return isValid;
+}
+
 function showFieldError(field, message) {
     clearFieldError(field);
     
     const errorDiv = document.createElement('div');
     errorDiv.className = 'field-error';
-    errorDiv.style.color = '#F44336';
-    errorDiv.style.fontSize = '0.875rem';
-    errorDiv.style.marginTop = '0.25rem';
     errorDiv.textContent = message;
+    errorDiv.setAttribute('role', 'alert');
+    errorDiv.setAttribute('aria-live', 'polite');
     
-    field.style.borderColor = '#F44336';
+    field.classList.add('field-invalid');
     field.parentNode.appendChild(errorDiv);
+    field.setAttribute('aria-describedby', field.id + '-error');
+    errorDiv.id = field.id + '-error';
 }
 
 function clearFieldError(field) {
@@ -90,7 +118,8 @@ function clearFieldError(field) {
     if (existingError) {
         existingError.remove();
     }
-    field.style.borderColor = '';
+    field.classList.remove('field-invalid');
+    field.removeAttribute('aria-describedby');
 }
 
 function isValidEmail(email) {
@@ -134,10 +163,23 @@ function performSearch() {
     if (category) params.append('category', category);
     if (status) params.append('status', status);
     
-    // Reload page with filters
-    const currentUrl = window.location.pathname;
-    const newUrl = params.toString() ? `${currentUrl}?${params.toString()}` : currentUrl;
-    window.location.href = newUrl;
+    // Update URL without page reload if possible
+    if (window.history && window.history.pushState) {
+        const currentUrl = window.location.pathname;
+        const newUrl = params.toString() ? `${currentUrl}?${params.toString()}` : currentUrl;
+        window.history.pushState({}, '', newUrl);
+        
+        // Trigger search event for AJAX handling if available
+        const searchEvent = new CustomEvent('searchUpdated', {
+            detail: { searchTerm, category, status }
+        });
+        document.dispatchEvent(searchEvent);
+    } else {
+        // Fallback to page reload for older browsers
+        const currentUrl = window.location.pathname;
+        const newUrl = params.toString() ? `${currentUrl}?${params.toString()}` : currentUrl;
+        window.location.href = newUrl;
+    }
 }
 
 // Interactive elements
@@ -154,27 +196,26 @@ function initInteractiveElements() {
     });
     
     // Auto-hide alerts
-    const alerts = document.querySelectorAll('.alert');
+    const alerts = document.querySelectorAll('.alert[data-auto-hide]');
     alerts.forEach(alert => {
+        const delay = parseInt(alert.getAttribute('data-auto-hide')) || 5000;
         setTimeout(() => {
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateY(-20px)';
+            alert.classList.add('alert-fade-out');
             setTimeout(() => {
                 alert.remove();
             }, 300);
-        }, 5000);
+        }, delay);
     });
     
-    // Book card hover effects
-    const bookCards = document.querySelectorAll('.book-card');
-    bookCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateX(5px) scale(1.02)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateX(0) scale(1)';
-        });
+    // Alert close buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.alert-close')) {
+            const alert = e.target.closest('.alert');
+            alert.classList.add('alert-fade-out');
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }
     });
     
     // Smooth scrolling for anchor links
@@ -191,19 +232,48 @@ function initInteractiveElements() {
             }
         });
     });
+    
+    // Keyboard navigation improvements
+    document.addEventListener('keydown', function(e) {
+        // Escape key to close modals or clear focus
+        if (e.key === 'Escape') {
+            const activeElement = document.activeElement;
+            if (activeElement && activeElement.blur) {
+                activeElement.blur();
+            }
+        }
+        
+        // Ctrl/Cmd + K for search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const searchInput = document.getElementById('search');
+            if (searchInput) {
+                searchInput.focus();
+            }
+        }
+    });
 }
 
 // Utility functions
 function showAlert(message, type = 'info') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} fade-in`;
-    alertDiv.textContent = message;
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.setAttribute('aria-live', 'polite');
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="alert-close" aria-label="Close alert">&times;</button>
+    `;
     
     const container = document.querySelector('.container') || document.body;
     container.insertBefore(alertDiv, container.firstChild);
     
+    // Auto-hide after 5 seconds
     setTimeout(() => {
-        alertDiv.remove();
+        alertDiv.classList.add('alert-fade-out');
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 300);
     }, 5000);
 }
 
@@ -228,82 +298,93 @@ function formatDateTime(dateTimeString) {
     });
 }
 
-// AJAX helper function
-function makeRequest(url, method = 'GET', data = null) {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open(method, url);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        
-        xhr.onload = function() {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    resolve(response);
-                } catch (e) {
-                    resolve(xhr.responseText);
-                }
-            } else {
-                reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
-            }
-        };
-        
-        xhr.onerror = function() {
-            reject(new Error('Network error'));
-        };
-        
-        if (data) {
-            xhr.send(JSON.stringify(data));
-        } else {
-            xhr.send();
+// Modern AJAX helper function using fetch API
+async function makeRequest(url, options = {}) {
+    const defaultOptions = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         }
-    });
+    };
+    
+    const config = { ...defaultOptions, ...options };
+    
+    // Add CSRF token if available
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (csrfToken) {
+        config.headers['X-CSRF-Token'] = csrfToken;
+    }
+    
+    try {
+        const response = await fetch(url, config);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json();
+        } else {
+            return await response.text();
+        }
+    } catch (error) {
+        console.error('Request failed:', error);
+        throw error;
+    }
 }
 
 // Book borrowing functionality
-function borrowBook(bookId) {
+async function borrowBook(bookId) {
     if (!confirm('Are you sure you want to borrow this book?')) {
         return;
     }
     
-    makeRequest('/student/borrow.php', 'POST', { book_id: bookId })
-        .then(response => {
-            if (response.success) {
-                showAlert('Book borrowed successfully!', 'success');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            } else {
-                showAlert(response.message || 'Failed to borrow book', 'error');
-            }
-        })
-        .catch(error => {
-            showAlert('An error occurred while borrowing the book', 'error');
-            console.error('Error:', error);
+    try {
+        const response = await makeRequest('/student/borrow.php', {
+            method: 'POST',
+            body: JSON.stringify({ book_id: bookId })
         });
+        
+        if (response.success) {
+            showAlert('Book borrowed successfully!', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert(response.message || 'Failed to borrow book', 'error');
+        }
+    } catch (error) {
+        showAlert('An error occurred while borrowing the book', 'error');
+        console.error('Error:', error);
+    }
 }
 
 // Book returning functionality
-function returnBook(borrowingId) {
+async function returnBook(borrowingId) {
     if (!confirm('Are you sure you want to return this book?')) {
         return;
     }
     
-    makeRequest('/student/return.php', 'POST', { borrowing_id: borrowingId })
-        .then(response => {
-            if (response.success) {
-                showAlert('Book returned successfully!', 'success');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            } else {
-                showAlert(response.message || 'Failed to return book', 'error');
-            }
-        })
-        .catch(error => {
-            showAlert('An error occurred while returning the book', 'error');
-            console.error('Error:', error);
+    try {
+        const response = await makeRequest('/student/return.php', {
+            method: 'POST',
+            body: JSON.stringify({ borrowing_id: borrowingId })
         });
+        
+        if (response.success) {
+            showAlert('Book returned successfully!', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert(response.message || 'Failed to return book', 'error');
+        }
+    } catch (error) {
+        showAlert('An error occurred while returning the book', 'error');
+        console.error('Error:', error);
+    }
 }
 
 // Real-time clock for dashboard
@@ -332,30 +413,6 @@ function initClock() {
     }
 }
 
-// Initialize clock on page load
-document.addEventListener('DOMContentLoaded', initClock);
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    // Ctrl/Cmd + K for search
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        const searchInput = document.getElementById('search');
-        if (searchInput) {
-            searchInput.focus();
-        }
-    }
-    
-    // Escape to close modals or clear search
-    if (e.key === 'Escape') {
-        const searchInput = document.getElementById('search');
-        if (searchInput && searchInput === document.activeElement) {
-            searchInput.value = '';
-            searchInput.blur();
-        }
-    }
-});
-
 // Print functionality
 function printPage() {
     window.print();
@@ -367,3 +424,117 @@ function exportData(format) {
     // Implementation would depend on backend support
 }
 
+// Debounce utility function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Throttle utility function
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
+}
+
+// Loading state management
+function showLoading(element) {
+    if (element) {
+        element.classList.add('loading');
+        element.setAttribute('aria-busy', 'true');
+    }
+}
+
+function hideLoading(element) {
+    if (element) {
+        element.classList.remove('loading');
+        element.setAttribute('aria-busy', 'false');
+    }
+}
+
+// Accessibility improvements
+function announceToScreenReader(message) {
+    const announcement = document.createElement('div');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.setAttribute('aria-atomic', 'true');
+    announcement.className = 'sr-only';
+    announcement.textContent = message;
+    
+    document.body.appendChild(announcement);
+    
+    setTimeout(() => {
+        document.body.removeChild(announcement);
+    }, 1000);
+}
+
+// Focus management
+function trapFocus(element) {
+    const focusableElements = element.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    
+    element.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === firstElement) {
+                    lastElement.focus();
+                    e.preventDefault();
+                }
+            } else {
+                if (document.activeElement === lastElement) {
+                    firstElement.focus();
+                    e.preventDefault();
+                }
+            }
+        }
+    });
+}
+
+// Performance monitoring
+function measurePerformance(name, fn) {
+    const start = performance.now();
+    const result = fn();
+    const end = performance.now();
+    console.log(`${name} took ${end - start} milliseconds`);
+    return result;
+}
+
+// Error handling
+window.addEventListener('error', function(e) {
+    console.error('JavaScript error:', e.error);
+    // Could send error to logging service in production
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('Unhandled promise rejection:', e.reason);
+    // Could send error to logging service in production
+});
+
+// Service worker registration (if available)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+                console.log('ServiceWorker registration successful');
+            })
+            .catch(function(err) {
+                console.log('ServiceWorker registration failed');
+            });
+    });
+}
