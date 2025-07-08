@@ -17,7 +17,6 @@
     }
     ?>
     <link rel="stylesheet" href="<?php echo $assets_path; ?>">
-    <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
     <header class="header">
@@ -54,21 +53,6 @@
                     <?php else: ?>
                         <li><a href="<?php echo $login_path; ?>">Login</a></li>
                         <li><a href="<?php echo $register_path; ?>">Register</a></li>
-
-            <a href="index.php" class="logo">Library System</a>
-            <nav>
-                <ul class="nav-menu">
-                    <li><a href="index.php">Home</a></li>
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <?php if ($_SESSION['role'] === 'admin'): ?>
-                            <li><a href="admin/dashboard.php">Admin Dashboard</a></li>
-                        <?php elseif ($_SESSION['role'] === 'student'): ?>
-                            <li><a href="student/dashboard.php">Student Dashboard</a></li>
-                        <?php endif; ?>
-                        <li><a href="user/logout.php">Logout</a></li>
-                    <?php else: ?>
-                        <li><a href="user/login.php">Login</a></li>
-                        <li><a href="user/register.php">Register</a></li>
                     <?php endif; ?>
                 </ul>
             </nav>
@@ -80,4 +64,3 @@
         </div>
     </header>
     <main>
-
