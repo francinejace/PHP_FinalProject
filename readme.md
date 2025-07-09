@@ -4,7 +4,7 @@
 
 <div align="center">
   <a href="https://github.com/francinejace/PHP_FinalProject">
-    <img src="././assets/img/mochi-mochi.png" alt="mochi-mochi" width="130" height="100">
+    <img src="./assets/img/mochi-mochi.png" alt="Mochi Mascot" width="130" height="100">
   </a>
   <h3 align="center">Library Management System</h3>
 </div>
@@ -73,7 +73,7 @@ This web application allows users to manage library activities like book searchi
 
 ### 📁 File Structure
 
-PHP_FINALPROJECT
+PHP_FinalProject <!-- Directory name intentionally uses 'FinalProject' for project identification -->
 ├─ admin
 │ └─ dashboard.php
 ├─ assets
