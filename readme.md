@@ -15,7 +15,7 @@
 
 <br />
 
-![](https://visit-counter.vercel.app/counter.png?page=francinejace/PHP_FINALPROJECT)
+![](https://visit-counter.vercel.app/counter.png?page=francinejace/PHP_FinalProject)
 
 ---
 
