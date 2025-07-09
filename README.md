@@ -73,37 +73,37 @@ This web application allows users to manage library activities like book searchi
 
 ### 📁 File Structure
 
-PHP_FinalProject
-├─ admin
-│  └─ dashboard.php
-├─ assets
-│ ├─ script.js
-│ └─ style.css
-├─ database
-│ ├─ init_sqlite.sql
-│ ├─ library_mysql.sql
-│ ├─ library.db
-│ └─ library.sql
-├─ includes
-│ ├─ footer.php
-│ ├─ header.php
-│ └─ navbar.php
-├─ student
-│ └─ dashboard.php
-├─ user
-│ ├─ login.php
-│ ├─ login_demo.php
-│ ├─ logout.php
-│ ├─ register.php
-│ └─ register_demo.php
-├─ .htaccess
-├─ config.php
-├─ config_production.php
-├─ DEPLOYMENT.md
-├─ functions.php
-├─ index.php
-├─ test.php
-└─ README.md
+PHP_FINALPROJECT <br>
+├─ admin <br>
+│ └─ dashboard.php <br>
+├─ assets <br>
+│ ├─ script.js <br>
+│ └─ style.css <br>
+├─ database <br>
+│ ├─ init_sqlite.sql <br>
+│ ├─ library_mysql.sql <br>
+│ ├─ library.db <br>
+│ └─ library.sql <br>
+├─ includes <br>
+│ ├─ footer.php <br>
+│ ├─ header.php <br>
+│ └─ navbar.php <br>
+├─ student <br>
+│ └─ dashboard.php <br>
+├─ user <br>
+│ ├─ login.php <br>
+│ ├─ login_demo.php <br>
+│ ├─ logout.php <br>
+│ ├─ register.php <br>
+│ └─ register_demo.php <br>
+├─ .htaccess <br>
+├─ config.php <br>
+├─ config_production.php <br>
+├─ DEPLOYMENT.md <br>
+├─ functions.php <br>
+├─ index.php <br>
+├─ test.php <br>
+└─ README.md <br>
 
 
 ---
