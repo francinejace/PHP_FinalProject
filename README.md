@@ -73,9 +73,9 @@ This web application allows users to manage library activities like book searchi
 
 ### 📁 File Structure
 
-PHP_FINALPROJECT
+PHP_FinalProject
 ├─ admin
-│ └─ dashboard.php
+│  └─ dashboard.php
 ├─ assets
 │ ├─ script.js
 │ └─ style.css
