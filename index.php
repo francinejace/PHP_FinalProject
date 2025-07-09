@@ -58,9 +58,9 @@ if (!file_exists('includes/header.php')) {
             <div class="nav-menu">
                 ' . (isSessionValid() ? 
                     '<span class="nav-user">Welcome, ' . htmlspecialchars($_SESSION['username'] ?? 'User') . '</span>
-                     <a href="user/logout.php" class="nav-link">Logout</a>' : 
+                        <a href="user/logout.php" class="nav-link">Logout</a>' :
                     '<a href="user/login.php" class="nav-link">Login</a>
-                     <a href="user/register.php" class="nav-link">Register</a>') . '
+                        <a href="user/register.php" class="nav-link">Register</a>') . '
             </div>
         </div>
     </nav>
@@ -173,8 +173,8 @@ include 'includes/header.php';
 <?php if (!empty($flashMessages)): ?>
 <div class="flash-messages">
     <?php foreach ($flashMessages as $message): ?>
-    <div class="flash-message flash-<?php echo htmlspecialchars($message['type']); ?>" 
-         data-auto-hide="5000" role="alert" aria-live="polite">
+    <div class="flash-message flash-<?php echo htmlspecialchars($message['type']); ?>"
+        data-auto-hide="5000" role="alert" aria-live="polite">
         <?php echo htmlspecialchars($message['text']); ?>
         <button type="button" class="flash-close" aria-label="Close message">&times;</button>
     </div>
