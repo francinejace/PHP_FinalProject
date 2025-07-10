@@ -24,12 +24,19 @@ if ($_POST) {
         if (mysqli_num_rows($check_query) > 0) {
             $error_message = "Username already exists. Please choose a different one.";
         } else {
+            // Hash the password
+            $hashed_password = password_hash($p, PASSWORD_DEFAULT);
+            
+            // Get the role_id for 'student' (assuming 'student' role has id 3 from previous database import)
+            // It's better to fetch this dynamically if roles can change, but for now, hardcoding for quick fix
+            $role_id = 3; // Assuming 'student' role has ID 3 based on library_mysql.sql
+
             // Insert new user
-            $result = mysqli_query($conn, "INSERT INTO users (username, password, role) VALUES ('$u', '$p', 'student')");
+            $result = mysqli_query($conn, "INSERT INTO users (username, password_hash, role_id, full_name, email) VALUES ('$u', '$hashed_password', '$role_id', '', '')");
             if ($result) {
                 $success_message = "Registration successful! You can now log in with your credentials.";
             } else {
-                $error_message = "Registration failed. Please try again.";
+                $error_message = "Registration failed. Please try again. " . mysqli_error($conn);
             }
         }
     }
@@ -91,4 +98,5 @@ if ($_POST) {
 </div>
 
 <?php include '../includes/footer.php'; ?>
+
 

@@ -9,19 +9,30 @@ if ($_POST) {
     $u = mysqli_real_escape_string($conn, $_POST['username']);
     $p = mysqli_real_escape_string($conn, $_POST['password']);
     
-    $q = mysqli_query($conn, "SELECT * FROM users WHERE username='$u' AND password='$p'");
-    if (mysqli_num_rows($q)) {
+    $q = mysqli_query($conn, "SELECT id, username, password_hash, role_id FROM users WHERE username='$u'");
+    
+    if (mysqli_num_rows($q) > 0) {
         $user = mysqli_fetch_assoc($q);
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['role'] = $user['role'];
         
-        if ($user['role'] === 'admin') {
-            header("Location: ../admin/dashboard.php");
+        // Verify password
+        if (password_verify($p, $user['password_hash'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            
+            // Fetch role name based on role_id
+            $role_query = mysqli_query($conn, "SELECT name FROM roles WHERE id=" . $user['role_id']);
+            $role_data = mysqli_fetch_assoc($role_query);
+            $_SESSION['role'] = $role_data['name'];
+            
+            if ($_SESSION['role'] === 'admin') {
+                header("Location: ../admin/dashboard.php");
+            } else {
+                header("Location: ../student/dashboard.php");
+            }
+            exit();
         } else {
-            header("Location: ../student/dashboard.php");
+            $error_message = "Invalid username or password. Please try again.";
         }
-        exit();
     } else {
         $error_message = "Invalid username or password. Please try again.";
     }
@@ -67,4 +78,5 @@ if ($_POST) {
 </div>
 
 <?php include '../includes/footer.php'; ?>
+
 

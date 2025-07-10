@@ -12,43 +12,44 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Environment detection
-$is_production = isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] !== 'localhost';
+// $is_production = isset($_SERVER["HTTP_HOST"]) && $_SERVER["HTTP_HOST"] !== "localhost";
+$is_production = false; // Force development environment for local testing
 
 // Database configuration
 if ($is_production) {
     // Production Database Configuration
-    // IMPORTANT: Update these values with your hosting provider's database credentials
-    define('DB_HOST', 'localhost');
-    define('DB_USER', 'your_db_username');
-    define('DB_PASS', 'your_db_password');
-    define('DB_NAME', 'your_db_name');
+    // IMPORTANT: Update these values with your hosting provider\"s database credentials
+    define("DB_HOST", "localhost");
+    define("DB_USER", "your_db_username");
+    define("DB_PASS", "your_db_password");
+    define("DB_NAME", "your_db_name");
     
     // Disable error reporting in production
     error_reporting(0);
-    ini_set('display_errors', 0);
+    ini_set("display_errors", 0);
 } else {
     // Development Database Configuration
-    define('DB_HOST', 'localhost');
-    define('DB_USER', 'root');
-    define('DB_PASS', '');
-    define('DB_NAME', 'library_system');
+    define("DB_HOST", "127.0.0.1");
+    define("DB_USER", "root");
+    define("DB_PASS", "");
+    define("DB_NAME", "library_system");
     
     // Enable error reporting in development
     error_reporting(E_ALL);
-    ini_set('display_errors', 1);
+    ini_set("display_errors", 1);
 }
 
 // Application settings
-define('SITE_NAME', 'Library Management System');
-define('SITE_URL', $is_production ? 'https://yourdomain.com' : 'http://localhost');
-define('ADMIN_EMAIL', $is_production ? 'admin@yourdomain.com' : 'admin@localhost');
+define("SITE_NAME", "Library Management System");
+define("SITE_URL", $is_production ? "https://yourdomain.com" : "http://localhost");
+define("ADMIN_EMAIL", $is_production ? "admin@yourdomain.com" : "admin@localhost");
 
 // Security settings
-define('CSRF_TOKEN_NAME', 'csrf_token');
-define('SESSION_TIMEOUT', 3600); // 1 hour in seconds
+define("CSRF_TOKEN_NAME", "csrf_token");
+define("SESSION_TIMEOUT", 3600); // 1 hour in seconds
 
 // Timezone
-date_default_timezone_set('Asia/Manila');
+date_default_timezone_set("Asia/Manila");
 
 // Database connection using PDO (recommended)
 try {
@@ -111,18 +112,18 @@ function verifyCSRFToken($token) {
  * Check if user session is valid
  */
 function isSessionValid() {
-    if (!isset($_SESSION['user_id']) || !isset($_SESSION['last_activity'])) {
+    if (!isset($_SESSION["user_id"]) || !isset($_SESSION["last_activity"])) {
         return false;
     }
     
     // Check session timeout
-    if (time() - $_SESSION['last_activity'] > SESSION_TIMEOUT) {
+    if (time() - $_SESSION["last_activity"] > SESSION_TIMEOUT) {
         session_destroy();
         return false;
     }
     
     // Update last activity time
-    $_SESSION['last_activity'] = time();
+    $_SESSION["last_activity"] = time();
     return true;
 }
 
@@ -131,9 +132,9 @@ function isSessionValid() {
  */
 function sanitizeInput($data) {
     if (is_array($data)) {
-        return array_map('sanitizeInput', $data);
+        return array_map("sanitizeInput", $data);
     }
-    return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars(trim($data), ENT_QUOTES, "UTF-8");
 }
 
 /**
@@ -157,4 +158,5 @@ function verifyPassword($password, $hash) {
     return password_verify($password, $hash);
 }
 ?>
+
 
