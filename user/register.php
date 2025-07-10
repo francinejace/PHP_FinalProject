@@ -31,13 +31,15 @@ if ($_POST) {
             // It's better to fetch this dynamically if roles can change, but for now, hardcoding for quick fix
             $role_id = 3; // Assuming 'student' role has ID 3 based on library_mysql.sql
 
-            // Insert new user
-            $result = mysqli_query($conn, "INSERT INTO users (username, password_hash, role_id, full_name, email) VALUES ('$u', '$hashed_password', '$role_id', '', '')");
-            if ($result) {
+            // Insert new user using prepared statement
+            $stmt = $conn->prepare("INSERT INTO users (username, password_hash, role_id, full_name, email) VALUES (?, ?, ?, '', '')");
+            $stmt->bind_param("ssi", $u, $hashed_password, $role_id);
+            if ($stmt->execute()) {
                 $success_message = "Registration successful! You can now log in with your credentials.";
             } else {
-                $error_message = "Registration failed. Please try again. " . mysqli_error($conn);
+                $error_message = "Registration failed. Please try again. " . $stmt->error;
             }
+            $stmt->close();
         }
     }
 }
